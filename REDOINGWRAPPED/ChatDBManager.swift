@@ -109,6 +109,59 @@ class ChatDBReader {
 
         return count
     }
+        func getTotalUniqueContacts() -> Int {
+        let query = """
+        SELECT COUNT(DISTINCT handle.id) as unique_contacts
+        FROM message
+        LEFT JOIN handle ON message.handle_id = handle.rowid
+        WHERE handle.id IS NOT NULL;
+        """
+
+        var stmt: OpaquePointer?
+        var count = 0
+
+        if sqlite3_prepare_v2(db, query, -1, &stmt, nil) == SQLITE_OK {
+            if sqlite3_step(stmt) == SQLITE_ROW {
+                count = Int(sqlite3_column_int(stmt, 0))
+            }
+            sqlite3_finalize(stmt)
+        } else {
+            print("❌ SQL error: \(String(cString: sqlite3_errmsg(db)))")
+        }
+
+        return count
+    }
+
+    func getTotalReceivedMessages() -> Int {
+        let query = """
+        SELECT COUNT(*) FROM message
+        WHERE is_from_me = 0;
+        """
+
+        var stmt: OpaquePointer?
+        var count = 0
+
+        if sqlite3_prepare_v2(db, query, -1, &stmt, nil) == SQLITE_OK {
+            if sqlite3_step(stmt) == SQLITE_ROW {
+                count = Int(sqlite3_column_int(stmt, 0))
+            }
+            sqlite3_finalize(stmt)
+        } else {
+            print("❌ SQL error: \(String(cString: sqlite3_errmsg(db)))")
+        }
+
+        return count
+    }
+
+    func getResponseRateStats() -> (receivedCount: Int, sentCount: Int, responseRate: Double) {
+        let receivedCount = getTotalReceivedMessages()
+        let sentCount = getTotalSentMessages()
+
+        let responseRate = receivedCount > 0 ? (Double(sentCount) / Double(receivedCount)) * 100.0 : 0.0
+
+        return (receivedCount: receivedCount, sentCount: sentCount, responseRate: responseRate)
+    }
+
     func getDailyMessageCounts() -> [(date: String, count: Int)] {
         let query = """
         SELECT
@@ -145,6 +198,8 @@ class ChatDBReader {
         let dbPath = documentsDirectory.appendingPathComponent("chat_copy.db").path
         return dbPath
     }
+    // COMMENTED OUT: Emoji functionality
+    /*
     func getTopUsedEmojis(limit: Int = 5) -> [(emoji: String, count: Int)] {
             guard let dbPath = getDBPath() else {
                 print("❌ No database path")
@@ -182,6 +237,5 @@ class ChatDBReader {
             let sorted = emojiCount.sorted { $0.value > $1.value }
             return Array(sorted.prefix(limit).map { (emoji: $0.key, count: $0.value) })
         }
+    */
     }
-
-}

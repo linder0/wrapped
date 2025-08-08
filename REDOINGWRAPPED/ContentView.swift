@@ -10,15 +10,18 @@ struct ContentView: View {
                         .font(.largeTitle)
                         .padding(.top)
 
-                    NavigationLink("Top 5 Contacts", destination: TopContactsView())
-                    NavigationLink("Total Messages Sent", destination: TotalMessagesView())
-//                    NavigationLink("Top Emojis", destination: TopEmojisView())      // ✅ enable this if you want it
-                    NavigationLink("Top Words", destination: TopWordsView())        // ✅ your new view here
+                    NavigationLink("Slide 1 - Messaging Activity", destination: Slide1View())
+                    NavigationLink("Slide 2 - Mysterious Response Rate", destination: Slide2View())
+                    NavigationLink("Slide 3 - Your Wrapped Summary ✨", destination: Slide3View())
+//                    NavigationLink("Social Superconnector", destination: TopContactsView())
+//                    NavigationLink("Total Messages Sent", destination: TotalMessagesView())
+//                    NavigationLink("Messages Per Day", destination: MessagesPerDayView())
 
                     // Add more stat views here
                 }
                 .padding()
             }
+            .navigationTitle("Pally Wrapped")
         }
     }
 }
@@ -154,7 +157,7 @@ struct ContentView: View {
 //                    let number = "+1 (415) 555-3695"  // Replace with test number
 //                    if let contact = lookupContact(by: number) {
 //                        print("✅ Found: \(contact.givenName) \(contact.familyName)")
-//                        
+//
 //                        if let imageData = contact.imageData,
 //                           let image = NSImage(data: imageData) {
 //                            print("🖼️ Contact has image (size: \(image.size))")

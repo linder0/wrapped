@@ -13,12 +13,14 @@ struct MessageDayCount: Identifiable {
 }
 
 struct TotalMessagesView: View {
-    
-    
+
+
     @State private var totalMessages: Int = 0
     @State private var mostActiveDay: String = "—"
     @State private var mostActiveCount: Int = 0
     @State private var dailyCounts: [(date: Date, count: Int)] = []
+    @State private var daysWithMessages: Int = 0
+    @State private var averageMessagesPerDay: Double = 0.0
 
     var body: some View {
         VStack(spacing: 24) {
@@ -30,7 +32,7 @@ struct TotalMessagesView: View {
                 .font(.system(size: 64, weight: .bold, design: .rounded))
                 .foregroundColor(.blue)
 
-            Text("That’s ~\(totalMessages / 365) per day. We hope your thumbs are OK.")
+            Text("That's ~\(String(format: "%.1f", averageMessagesPerDay)) per active day across \(daysWithMessages) days with messages.")
                 .multilineTextAlignment(.center)
                 .padding(.horizontal)
 
@@ -42,7 +44,7 @@ struct TotalMessagesView: View {
             Text("\(mostActiveDay) — \(mostActiveCount) messages")
                 .font(.headline)
                 .foregroundColor(.purple)
-            
+
             NavigationLink("View Full Chart") {
                 let transformedCounts = dailyCounts.map { MessageDayCount(date: $0.date, count: $0.count) }
                 DailyMessageGraphView(dailyCounts: transformedCounts)
@@ -64,8 +66,17 @@ struct TotalMessagesView: View {
         if let reader = ChatDBReader() {
             totalMessages = reader.getTotalSentMessages()
 
-            let dailyCounts = reader.getDailyMessageCounts()
-            if let top = dailyCounts.first {
+            let dailyCountsData = reader.getDailyMessageCounts()
+            daysWithMessages = dailyCountsData.count
+
+            // Calculate average messages per active day
+            if daysWithMessages > 0 {
+                averageMessagesPerDay = Double(totalMessages) / Double(daysWithMessages)
+            } else {
+                averageMessagesPerDay = 0.0
+            }
+
+            if let top = dailyCountsData.first {
                 mostActiveDay = top.date
                 mostActiveCount = top.count
             }
